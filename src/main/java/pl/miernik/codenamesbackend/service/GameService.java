@@ -1,41 +1,50 @@
 package pl.miernik.codenamesbackend.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
 import pl.miernik.codenamesbackend.data.Tile;
+import pl.miernik.codenamesbackend.repository.GameStatusRepo;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class GameService {
 
-    private static final int IMAGES_COUNT = 30;
+    private final GameStatusRepo gameStatusRepo;
+    @Value("${image.count}")
+    private int IMAGE_COUNT;
 
-    public GameStatus createGame() {
+
+    public String createGame() {
         String token = generateToken();
         List<Tile> tiles = generateRandomBlankTiles();
-
         GameStatus gameStatus = new GameStatus(token, tiles);
         setRandomColorTiles(gameStatus.getTiles());
-
-
-        return gameStatus;
+        gameStatusRepo.save(gameStatus);
+        return token;
     }
 
     private List<Tile> generateRandomBlankTiles() {
-        List<Integer> imagesNumbers = new ArrayList<Integer>(IMAGES_COUNT);
+        List<Integer> imageNumbers = new ArrayList<>(IMAGE_COUNT);
 
-        for(int i = 1; i <= IMAGES_COUNT; i++) {
-            imagesNumbers.add(i);
+        for(int i = 1; i <= IMAGE_COUNT; i++) {
+            imageNumbers.add(i);
         }
 
         //shuffle list
-        Collections.shuffle(imagesNumbers);
+        Collections.shuffle(imageNumbers);
 
-        // return first 25 tiles
-        return imagesNumbers.stream().limit(25).map(x -> new Tile(x, null)).collect(Collectors.toList());
+        // return 25 tiles from the beginning
+        return imageNumbers.stream()
+                .limit(25)
+                .map(imgNo -> new Tile(false, imgNo, null))
+                .collect(Collectors.toList());
     }
 
     private String generateToken() {
@@ -52,9 +61,7 @@ public class GameService {
     }
 
     private void setRandomColorTiles(List<Tile> tiles) {
-
         Random random = new Random();
-
         // black card draw
         int blackIndex = random.nextInt(25);
         tiles.get(blackIndex).setColor(Color.BLACK);
@@ -87,6 +94,47 @@ public class GameService {
                 tile.setColor(Color.GRAY);
             }
         }
+    }
 
+    public GameStatus getPrivateGameStatus(String token) {
+        return gameStatusRepo.findAllByToken(token);
+    }
+
+    public GameStatus getPublicGameStatus(String token) {
+        GameStatus gameStatus = gameStatusRepo.findAllByToken(token);
+        List<Tile> publicTileList = gameStatus.getTiles().stream()
+                .map(tile -> {
+                    if(!tile.isOpen()) tile.setColor(null);
+                    return tile;
+                })
+                .collect(Collectors.toList());
+
+        gameStatus.setTiles(publicTileList);
+        return gameStatus;
+    }
+
+    @Transactional
+    public Color getTileColor(String token, int imageNumber) {
+
+        GameStatus gameStatus = gameStatusRepo.findAllByToken(token);
+
+        List<Tile> tiles = gameStatus.getTiles()
+                .stream()
+                .map(tile -> {
+                    if(tile.getImageNumber() == imageNumber) {
+                        tile.setOpen(true);
+                    }
+                    return tile;
+                })
+                .collect(Collectors.toList());
+
+        gameStatus.setTiles(tiles);
+        gameStatusRepo.save(gameStatus);
+
+        return tiles.stream()
+                .filter(tile -> tile.getImageNumber() == imageNumber)
+                .findFirst()
+                .map(Tile::getColor)
+                .orElse(null);
     }
 }
