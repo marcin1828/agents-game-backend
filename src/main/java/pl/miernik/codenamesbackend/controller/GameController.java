@@ -1,6 +1,7 @@
 package pl.miernik.codenamesbackend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
@@ -17,7 +18,7 @@ public class GameController {
 
     @GetMapping("/create")
     public String createGame() {
-        return gameService.createGame();
+        return JSONObject.quote(gameService.createGame());
     }
 
     @GetMapping("/{token}/status/private")
