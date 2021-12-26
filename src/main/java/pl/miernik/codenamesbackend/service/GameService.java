@@ -137,4 +137,8 @@ public class GameService {
                 .map(Tile::getColor)
                 .orElse(null);
     }
+
+    public boolean validateGameId(String id) {
+        return gameStatusRepo.findAllByToken(id) != null;
+    }
 }

@@ -1,11 +1,13 @@
 package pl.miernik.codenamesbackend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
 import pl.miernik.codenamesbackend.service.GameService;
+
+import java.util.Collections;
+import java.util.Map;
 
 
 @RestController
@@ -17,8 +19,13 @@ public class GameController {
     private final GameService gameService;
 
     @GetMapping("/create")
-    public String createGame() {
-        return JSONObject.quote(gameService.createGame());
+    public Map<String, String> createGame() {
+        return Collections.singletonMap("gameId", gameService.createGame());
+    }
+
+    @GetMapping("/{id}/validate")
+    public Map<String, Boolean> validateGameId(@PathVariable String id) {
+        return Collections.singletonMap("valid", gameService.validateGameId(id));
     }
 
     @GetMapping("/{token}/status/private")
