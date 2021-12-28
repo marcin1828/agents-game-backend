@@ -15,6 +15,15 @@ public class GameStatus {
 
     private String token;
 
+    private String blueLeaderId = "";
+    private String blueLeaderName = "";
+    private String blueAgentId = "";
+    private String blueAgentName = "";
+    private String redLeaderId = "";
+    private String redLeaderName = "";
+    private String redAgentId = "";
+    private String redAgentName = "";
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<Tile> tiles;
 

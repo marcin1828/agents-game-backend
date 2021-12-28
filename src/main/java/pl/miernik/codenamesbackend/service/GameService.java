@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
 import pl.miernik.codenamesbackend.data.Tile;
+import pl.miernik.codenamesbackend.dto.Players;
 import pl.miernik.codenamesbackend.repository.GameStatusRepo;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,5 +140,58 @@ public class GameService {
 
     public boolean validateGameId(String id) {
         return gameStatusRepo.findAllByToken(id) != null;
+    }
+
+    @Transactional
+    public String joinToGame(String gameId, String team, String role, String userName) {
+        String userId = this.generateToken();
+        GameStatus gameStatus = gameStatusRepo.findAllByToken(gameId);
+        if (team.equals("blue")) {
+            if (role.equals("leader")) {
+                if(gameStatus.getBlueLeaderId().equals("") && gameStatus.getBlueLeaderName().equals("")) {
+                    gameStatus.setBlueLeaderId(userId);
+                    gameStatus.setBlueLeaderName(userName);
+                    gameStatusRepo.save(gameStatus);
+                    return userId;
+                }
+            } else {
+                if(gameStatus.getBlueAgentId().equals("") && gameStatus.getBlueAgentName().equals("")) {
+                    gameStatus.setBlueAgentId(userId);
+                    gameStatus.setBlueAgentName(userName);
+                    gameStatusRepo.save(gameStatus);
+                    return userId;
+                }
+            }
+        } else {
+            if (role.equals("leader")) {
+                if(gameStatus.getRedLeaderId().equals("") && gameStatus.getRedLeaderName().equals("")) {
+                    gameStatus.setRedLeaderId(userId);
+                    gameStatus.setRedLeaderName(userName);
+                    gameStatusRepo.save(gameStatus);
+                    return userId;
+                }
+            } else {
+                if(gameStatus.getRedAgentId().equals("") && gameStatus.getRedAgentName().equals("")) {
+                    gameStatus.setRedAgentId(userId);
+                    gameStatus.setRedAgentName(userName);
+                    gameStatusRepo.save(gameStatus);
+                    return userId;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Players getPlayers(String gameId) {
+        GameStatus status = gameStatusRepo.findAllByToken(gameId);
+        return new Players(
+                status.getBlueLeaderId(),
+                status.getBlueLeaderName(),
+                status.getBlueAgentId(),
+                status.getBlueAgentName(),
+                status.getRedLeaderId(),
+                status.getRedLeaderName(),
+                status.getRedAgentId(),
+                status.getRedAgentName());
     }
 }
