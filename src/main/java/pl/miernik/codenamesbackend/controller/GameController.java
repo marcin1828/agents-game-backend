@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
+import pl.miernik.codenamesbackend.dto.Players;
 import pl.miernik.codenamesbackend.service.GameService;
 
 import java.util.Collections;
@@ -23,23 +24,37 @@ public class GameController {
         return Collections.singletonMap("gameId", gameService.createGame());
     }
 
-    @GetMapping("/{id}/validate")
-    public Map<String, Boolean> validateGameId(@PathVariable String id) {
-        return Collections.singletonMap("valid", gameService.validateGameId(id));
+    @GetMapping("/{gameId}/validate")
+    public Map<String, Boolean> validateGameId(@PathVariable String gameId) {
+        return Collections.singletonMap("valid", gameService.validateGameId(gameId));
     }
 
-    @GetMapping("/{token}/status/private")
-    public GameStatus getPrivateGameStatus(@PathVariable String token) {
-        return gameService.getPrivateGameStatus(token);
+    @PostMapping("/{gameId}/join")
+    public Map<String, String> joinToGame(@PathVariable String gameId, @RequestBody Map<String,String> body) {
+        return Collections.singletonMap("userId", gameService.joinToGame(
+                gameId,
+                body.get("team"),
+                body.get("role"),
+                body.get("userName")));
     }
 
-    @GetMapping("/{token}/status/public")
-    public GameStatus getPublicGameStatus(@PathVariable String token) {
-        return gameService.getPublicGameStatus(token);
+    @GetMapping("/{gameId}/status/players")
+    public Players getPlayers(@PathVariable String gameId) {
+        return gameService.getPlayers(gameId);
     }
 
-    @GetMapping("/{token}/tile/color")
-    public Color getGameStatus(@PathVariable String token, @RequestParam int imageNumber) {
-        return gameService.getTileColor(token, imageNumber);
+    @GetMapping("/{gameId}/status/private")
+    public GameStatus getPrivateGameStatus(@PathVariable String gameId) {
+        return gameService.getPrivateGameStatus(gameId);
+    }
+
+    @GetMapping("/{gameId}/status/public")
+    public GameStatus getPublicGameStatus(@PathVariable String gameId) {
+        return gameService.getPublicGameStatus(gameId);
+    }
+
+    @GetMapping("/{gameId}/tile/color")
+    public Color getGameStatus(@PathVariable String gameId, @RequestParam int imageNumber) {
+        return gameService.getTileColor(gameId, imageNumber);
     }
 }
