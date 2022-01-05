@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
 import pl.miernik.codenamesbackend.data.Tile;
+import pl.miernik.codenamesbackend.dto.PlayerInfo;
 import pl.miernik.codenamesbackend.dto.Players;
 import pl.miernik.codenamesbackend.repository.GameStatusRepo;
 import java.util.*;
@@ -193,5 +194,20 @@ public class GameService {
                 status.getRedLeaderName(),
                 status.getRedAgentId(),
                 status.getRedAgentName());
+    }
+
+    public PlayerInfo getPlayerInfo(String gameId, String playerId) {
+        GameStatus status = gameStatusRepo.findAllByToken(gameId);
+
+        if (playerId.equals(status.getBlueAgentId())) {
+            return new PlayerInfo(playerId, status.getBlueAgentName(), "blue", "agent");
+        } else if (playerId.equals(status.getBlueLeaderId())) {
+            return new PlayerInfo(playerId, status.getBlueLeaderName(), "blue", "leader");
+        } else if (playerId.equals(status.getRedAgentId())) {
+            return new PlayerInfo(playerId, status.getRedAgentName(), "red", "agent");
+        } else if (playerId.equals(status.getRedLeaderId())) {
+            return new PlayerInfo(playerId, status.getRedLeaderName(), "red", "leader");
+        }
+        return null;
     }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pl.miernik.codenamesbackend.data.Color;
 import pl.miernik.codenamesbackend.data.GameStatus;
+import pl.miernik.codenamesbackend.dto.PlayerInfo;
 import pl.miernik.codenamesbackend.dto.Players;
 import pl.miernik.codenamesbackend.service.GameService;
 
@@ -41,6 +42,11 @@ public class GameController {
     @GetMapping("/{gameId}/status/players")
     public Players getPlayers(@PathVariable String gameId) {
         return gameService.getPlayers(gameId);
+    }
+
+    @GetMapping("/{gameId}/status/player/{playerId}")
+    public PlayerInfo getPlayerInfo(@PathVariable String gameId, @PathVariable String playerId) {
+        return gameService.getPlayerInfo(gameId, playerId);
     }
 
     @GetMapping("/{gameId}/status/private")
