@@ -24,6 +24,11 @@ public class GameStatus {
     private String redAgentId = "";
     private String redAgentName = "";
 
+    private String startingTeam;
+    private String playingTeam;
+    private int blueTilesLeft;
+    private int redTilesLeft;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<Tile> tiles;
 

@@ -26,7 +26,10 @@ public class GameService {
         String token = generateToken();
         List<Tile> tiles = generateRandomBlankTiles();
         GameStatus gameStatus = new GameStatus(token, tiles);
-        setRandomColorTiles(gameStatus.getTiles());
+        String startingTeam = selectStartingTeam();
+        gameStatus.setStartingTeam(startingTeam);
+        gameStatus.setPlayingTeam(startingTeam);
+        setRandomColorTiles(gameStatus, startingTeam);
         gameStatusRepo.save(gameStatus);
         return token;
     }
@@ -61,31 +64,47 @@ public class GameService {
                 .toString();
     }
 
-    private void setRandomColorTiles(List<Tile> tiles) {
+    private String selectStartingTeam() {
+        Random random = new Random();
+        if (random.nextInt(2) == 0) {
+            return "blue";
+        }
+        return "red";
+    }
+
+    private void setRandomColorTiles(GameStatus gameStatus, String startingTeam) {
+        List<Tile> tiles = gameStatus.getTiles();
+        int blueCount = 8;
+        int redCount = 9;
+
+        if(startingTeam.equals("blue")) {
+            blueCount = 9;
+            redCount = 8;
+        }
+
+        gameStatus.setBlueTilesLeft(blueCount);
+        gameStatus.setRedTilesLeft(redCount);
+
         Random random = new Random();
         // black card draw
         int blackIndex = random.nextInt(25);
         tiles.get(blackIndex).setColor(Color.BLACK);
 
         // red card draw
-        for(int i = 9; i > 0; i--) {
+        while(redCount > 0) {
             int redIndex = random.nextInt(25);
             if(tiles.get(redIndex).getColor() == null) {
                 tiles.get(redIndex).setColor(Color.RED);
-            }
-            else {
-                i++;
+                redCount--;
             }
         }
 
         // blue card draw
-        for(int i = 8; i > 0; i--) {
+        while(blueCount > 0) {
             int blueIndex = random.nextInt(25);
             if(tiles.get(blueIndex).getColor() == null) {
                 tiles.get(blueIndex).setColor(Color.BLUE);
-            }
-            else {
-                i++;
+                blueCount--;
             }
         }
 
