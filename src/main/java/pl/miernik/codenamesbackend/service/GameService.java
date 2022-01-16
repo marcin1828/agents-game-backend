@@ -123,9 +123,8 @@ public class GameService {
     public GameStatus getPublicGameStatus(String token) {
         GameStatus gameStatus = gameStatusRepo.findAllByToken(token);
         List<Tile> publicTileList = gameStatus.getTiles().stream()
-                .map(tile -> {
+                .peek(tile -> {
                     if(!tile.isOpen()) tile.setColor(null);
-                    return tile;
                 })
                 .collect(Collectors.toList());
 
@@ -140,11 +139,16 @@ public class GameService {
 
         List<Tile> tiles = gameStatus.getTiles()
                 .stream()
-                .map(tile -> {
+                .peek(tile -> {
                     if(tile.getImageNumber() == imageNumber) {
                         tile.setOpen(true);
+                        Color selectedColor = tile.getColor();
+                        if(selectedColor == Color.BLUE) {
+                            gameStatus.setBlueTilesLeft(gameStatus.getBlueTilesLeft() - 1);
+                        } else if(selectedColor == Color.RED) {
+                            gameStatus.setRedTilesLeft(gameStatus.getRedTilesLeft() - 1);
+                        }
                     }
-                    return tile;
                 })
                 .collect(Collectors.toList());
 
